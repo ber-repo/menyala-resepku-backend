@@ -8,7 +8,6 @@ import java.util.List;
 public interface RecipeRepository extends JpaRepository<Recipe, Integer> {
 
 
-    List<Recipe> findByRecipeName(String name);
-
-    List<Recipe> findByFavorite(Boolean favorite);
+    List<Recipe> findByIsFavorite(Boolean isFavorite);
+    List<Recipe> findByRecipeNameContainingIgnoreCase(String keyword);
 }
