@@ -3,7 +3,7 @@ package com.foodrecipe.backend.model;
 import jakarta.persistence.*;
 
 import java.util.List;
-
+// table
 @Entity
 @Table(name = "step")
 public class Step {
