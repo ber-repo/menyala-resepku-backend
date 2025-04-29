@@ -10,26 +10,18 @@ public class AddRecipeRequest {
     private String recipeName;
     private String recipeDescription;
     private Boolean isFavorite;
-    private Ingredient ingredient;
-    private Step step;
+    private List<Ingredient> ingredients;  
+    private List<Step> steps;  
 
     public AddRecipeRequest() {
     }
 
-    public AddRecipeRequest(String recipeName, String recipeDescription, Boolean isFavorite, Ingredient ingredient, Step step) {
+    public AddRecipeRequest(String recipeName, Boolean isFavorite, String recipeDescription, List<Ingredient> ingredients, List<Step> steps) {
         this.recipeName = recipeName;
-        this.recipeDescription = recipeDescription;
         this.isFavorite = isFavorite;
-        this.ingredient = ingredient;
-        this.step = step;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
+        this.recipeDescription = recipeDescription;
+        this.ingredients = ingredients;
+        this.steps = steps;
     }
 
     public String getRecipeName() {
@@ -56,20 +48,27 @@ public class AddRecipeRequest {
         isFavorite = favorite;
     }
 
-    public Ingredient getIngredient() {
-        return ingredient;
+    public List<Ingredient> getIngredients() {
+        return ingredients;
     }
 
-    public void setIngredient(Ingredient ingredient) {
-        this.ingredient = ingredient;
+    public void setIngredients(List<Ingredient> ingredients) {
+        this.ingredients = ingredients;
     }
 
-    public Step getStep() {
-        return step;
+    public List<Step> getSteps() {
+        return steps;
     }
 
-    public void setStep(Step step) {
-        this.step = step;
+    public void setSteps(List<Step> steps) {
+        this.steps = steps;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }
-
