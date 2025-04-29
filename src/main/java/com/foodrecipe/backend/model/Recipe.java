@@ -1,5 +1,6 @@
 package com.foodrecipe.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class Recipe {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @JsonIgnoreProperties("recipe") // This breaks the infinite recursion
     private List<Image> images;
 
     @OneToMany(
@@ -26,26 +28,30 @@ public class Recipe {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<Ingredient> ingredient;
+    @JsonIgnoreProperties("recipe") // This breaks the infinite recursion
+    private List<Ingredient> ingredients;
 
     @OneToMany(
             mappedBy = "recipe",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<Step> step;
+    @JsonIgnoreProperties("recipe") // This breaks the infinite recursion
+    private List<Step> steps;
 
     public Recipe() {
     }
 
-    public Recipe(String recipeName, String recipeDescription, Boolean isFavorite, List<Image> images, List<Ingredient> ingredient, List<Step> step) {
+
+    public Recipe(String recipeName, String recipeDescription, Boolean isFavorite, List<Image> images, List<Ingredient> ingredients, List<Step> steps) {
         this.recipeName = recipeName;
         this.recipeDescription = recipeDescription;
         this.isFavorite = isFavorite;
         this.images = images;
-        this.ingredient = ingredient;
-        this.step = step;
+        this.ingredients = ingredients;
+        this.steps = steps;
     }
+
 
     public Integer getId() {
         return id;
@@ -71,11 +77,11 @@ public class Recipe {
         this.recipeDescription = recipeDescription;
     }
 
-    public Boolean getFavorite() {
+    public Boolean getIsFavorite() {
         return isFavorite;
     }
 
-    public void setFavorite(Boolean favorite) {
+    public void setIsFavorite(Boolean favorite) {
         isFavorite = favorite;
     }
 
@@ -87,19 +93,19 @@ public class Recipe {
         this.images = images;
     }
 
-    public List<Ingredient> getIngredient() {
-        return ingredient;
+    public List<Ingredient> getIngredients() {
+        return ingredients;
     }
 
-    public void setIngredient(List<Ingredient> ingredient) {
-        this.ingredient = ingredient;
+    public void setIngredients(List<Ingredient> ingredients) {
+        this.ingredients = ingredients;
     }
 
-    public List<Step> getStep() {
-        return step;
+    public List<Step> getSteps() {
+        return steps;
     }
 
-    public void setStep(List<Step> step) {
-        this.step = step;
+    public void setSteps(List<Step> steps) {
+        this.steps = steps;
     }
 }
