@@ -1,5 +1,6 @@
 package com.foodrecipe.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -14,6 +15,7 @@ public class Ingredient {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id")
+    @JsonIgnoreProperties("ingredients") 
     private Recipe recipe;
 
     public Ingredient() {
