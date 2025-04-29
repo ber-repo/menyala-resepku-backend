@@ -9,10 +9,11 @@ public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String file_name;
-    private String file_type;
+    private String fileName;
+    private String fileType;
     @Lob
     private byte[] image;
+    private String downloadUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id")
@@ -21,10 +22,11 @@ public class Image {
     public Image() {
     }
 
-    public Image(String file_name, String file_type, byte[] image, Recipe recipe) {
-        this.file_name = file_name;
-        this.file_type = file_type;
+    public Image(String fileName, String fileType, byte[] image, String downloadUrl, Recipe recipe) {
+        this.fileName = fileName;
+        this.fileType = fileType;
         this.image = image;
+        this.downloadUrl = downloadUrl;
         this.recipe = recipe;
     }
 
@@ -36,20 +38,20 @@ public class Image {
         this.id = id;
     }
 
-    public String getFile_name() {
-        return file_name;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setFile_name(String file_name) {
-        this.file_name = file_name;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
-    public String getFile_type() {
-        return file_type;
+    public String getFileType() {
+        return fileType;
     }
 
-    public void setFile_type(String file_type) {
-        this.file_type = file_type;
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
     }
 
     public byte[] getImage() {
@@ -58,6 +60,14 @@ public class Image {
 
     public void setImage(byte[] image) {
         this.image = image;
+    }
+
+    public String getDownloadUrl() {
+        return downloadUrl;
+    }
+
+    public void setDownloadUrl(String downloadUrl) {
+        this.downloadUrl = downloadUrl;
     }
 
     public Recipe getRecipe() {
