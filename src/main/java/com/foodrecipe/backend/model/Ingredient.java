@@ -1,29 +1,27 @@
 package com.foodrecipe.backend.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
-import java.util.List;
-
 @Entity
-@Table(name = "ingredient")
+@Table(name = "ingredients")
 public class Ingredient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String ingredient;
+    private String ingredientName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "recipe_id")
-    @JsonIgnoreProperties("ingredients") 
+    @JsonBackReference
     private Recipe recipe;
 
     public Ingredient() {
 
     }
 
-    public Ingredient(String ingredient) {
-        this.ingredient = ingredient;
+    public Ingredient(String ingredientName) {
+        this.ingredientName = ingredientName;
     }
 
     public Integer getId() {
@@ -34,12 +32,12 @@ public class Ingredient {
         this.id = id;
     }
 
-    public String getIngredient() {
-        return ingredient;
+    public String getIngredientName() {
+        return ingredientName;
     }
 
-    public void setIngredient(String ingredient) {
-        this.ingredient = ingredient;
+    public void setIngredientName(String ingredientName) {
+        this.ingredientName = ingredientName;
     }
 
     public Recipe getRecipe() {
