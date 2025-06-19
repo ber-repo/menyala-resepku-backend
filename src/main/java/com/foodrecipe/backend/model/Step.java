@@ -1,27 +1,29 @@
 package com.foodrecipe.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.util.List;
-// table
+
 @Entity
 @Table(name = "step")
 public class Step {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private Integer orderNumber;
     private String stepDescription;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "recipe_id")
+    @JsonBackReference
     private Recipe recipe;
 
     public Step() {
     }
 
-    public Step(Integer orderNumber, String stepDescription, Recipe recipe) {
-        this.orderNumber = orderNumber;
+    public Step(String stepDescription, Recipe recipe) {
         this.stepDescription = stepDescription;
         this.recipe = recipe;
     }
@@ -32,14 +34,6 @@ public class Step {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public Integer getOrderNumber() {
-        return orderNumber;
-    }
-
-    public void setOrderNumber(Integer orderNumber) {
-        this.orderNumber = orderNumber;
     }
 
     public String getStepDescription() {
