@@ -10,4 +10,6 @@ public interface IStepService {
     List<Step> getStepByRecipeId(Integer recipeId);
     Step updateStep(Integer id, Step stepDetails);
     void deleteStep(Integer id);
+
+    Step save(Step step);
 }
