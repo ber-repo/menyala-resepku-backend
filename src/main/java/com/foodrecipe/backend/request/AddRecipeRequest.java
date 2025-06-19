@@ -1,7 +1,8 @@
 package com.foodrecipe.backend.request;
 
-import com.foodrecipe.backend.model.Ingredient;
-import com.foodrecipe.backend.model.Step;
+import com.foodrecipe.backend.model.Category;
+import com.foodrecipe.backend.model.Image;
+import com.foodrecipe.backend.model.User;
 
 import java.util.List;
 
@@ -9,19 +10,29 @@ public class AddRecipeRequest {
     private Integer id;
     private String recipeName;
     private String recipeDescription;
-    private Boolean isFavorite;
-    private List<Ingredient> ingredients;  
-    private List<Step> steps;  
+    private Boolean isFavorite = false;
+    private Category category;
+    private User user;
+    private Integer userId;
+
 
     public AddRecipeRequest() {
     }
 
-    public AddRecipeRequest(String recipeName, Boolean isFavorite, String recipeDescription, List<Ingredient> ingredients, List<Step> steps) {
+    public AddRecipeRequest(String recipeName, Boolean isFavorite, String recipeDescription, Category category, User user) {
         this.recipeName = recipeName;
         this.isFavorite = isFavorite;
         this.recipeDescription = recipeDescription;
-        this.ingredients = ingredients;
-        this.steps = steps;
+        this.category = category;
+        this.user = user;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getRecipeName() {
@@ -48,27 +59,29 @@ public class AddRecipeRequest {
         isFavorite = favorite;
     }
 
-    public List<Ingredient> getIngredients() {
-        return ingredients;
+    public Category getCategory() {
+        return category;
     }
 
-    public void setIngredients(List<Ingredient> ingredients) {
-        this.ingredients = ingredients;
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
-    public List<Step> getSteps() {
-        return steps;
+    public User getUser() {
+        return user;
     }
 
-    public void setSteps(List<Step> steps) {
-        this.steps = steps;
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    public Integer getId() {
-        return id;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
+
+
 }

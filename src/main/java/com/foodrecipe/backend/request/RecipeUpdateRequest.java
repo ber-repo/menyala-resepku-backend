@@ -1,28 +1,22 @@
 package com.foodrecipe.backend.request;
 
-import com.foodrecipe.backend.model.Ingredient;
-import com.foodrecipe.backend.model.Step;
-
-import java.util.List;
+import com.foodrecipe.backend.model.Category;
 
 public class RecipeUpdateRequest {
     private Integer id;
     private String recipeName;
     private String recipeDescription;
-    private Boolean isFavorite;
-    private List<Ingredient> ingredients;
-    private List<Step> steps;
+    private Boolean isFavorite = false;
+    private Category category;
 
     public RecipeUpdateRequest() {
     }
 
-    public RecipeUpdateRequest(String recipeName, String recipeDescription, Boolean isFavorite,
-                               List<Ingredient> ingredients, List<Step> steps) {
+    public RecipeUpdateRequest(String recipeName, Category category, Boolean isFavorite, String recipeDescription) {
         this.recipeName = recipeName;
-        this.recipeDescription = recipeDescription;
+        this.category = category;
         this.isFavorite = isFavorite;
-        this.ingredients = ingredients;
-        this.steps = steps;
+        this.recipeDescription = recipeDescription;
     }
 
     public Integer getId() {
@@ -57,20 +51,12 @@ public class RecipeUpdateRequest {
         isFavorite = favorite;
     }
 
-    public List<Ingredient> getIngredients() {
-        return ingredients;
+    public Category getCategory() {
+        return category;
     }
 
-    public void setIngredients(List<Ingredient> ingredients) {
-        this.ingredients = ingredients;
-    }
-
-    public List<Step> getSteps() {
-        return steps;
-    }
-
-    public void setSteps(List<Step> steps) {
-        this.steps = steps;
+    public void setCategory(Category category) {
+        this.category = category;
     }
 }
 
