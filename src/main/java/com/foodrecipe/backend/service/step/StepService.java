@@ -3,7 +3,6 @@ package com.foodrecipe.backend.service.step;
 import com.foodrecipe.backend.exception.ResourceNotFoundException;
 import com.foodrecipe.backend.model.Recipe;
 import com.foodrecipe.backend.model.Step;
-import com.foodrecipe.backend.repository.IngredientRepository;
 import com.foodrecipe.backend.repository.RecipeRepository;
 import com.foodrecipe.backend.repository.StepRepository;
 import org.springframework.stereotype.Service;
@@ -40,7 +39,7 @@ public class StepService implements IStepService{
         recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe not found!"));
 
-        return stepRepository.findByRecipeIdOrderByOrderNumber(recipeId);
+        return stepRepository.findByRecipeId(recipeId);
     }
 
     @Override
@@ -48,7 +47,6 @@ public class StepService implements IStepService{
         Step step = stepRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Step not found!"));
 
-        step.setOrderNumber(stepDetails.getOrderNumber());
         step.setStepDescription(stepDetails.getStepDescription());
 
         return stepRepository.save(step);
@@ -60,5 +58,10 @@ public class StepService implements IStepService{
                 .ifPresentOrElse(stepRepository::delete, () -> {
                     throw new ResourceNotFoundException("Step not found!");
                 });
+    }
+
+    @Override
+    public Step save(Step step) {
+        return addStep(step);
     }
 }
