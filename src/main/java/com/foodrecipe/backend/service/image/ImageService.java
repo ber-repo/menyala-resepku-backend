@@ -5,24 +5,26 @@ import com.foodrecipe.backend.exception.ResourceNotFoundException;
 import com.foodrecipe.backend.model.Image;
 import com.foodrecipe.backend.model.Recipe;
 import com.foodrecipe.backend.repository.ImageRepository;
-import com.foodrecipe.backend.service.recipe.IRecipeService;
+import com.foodrecipe.backend.repository.RecipeRepository;
+import com.foodrecipe.backend.service.recipe.RecipeService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.sql.rowset.serial.SerialBlob;
+import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class ImageService implements IImageService{
     private final ImageRepository imageRepository;
-    private final IRecipeService recipeService;
+    private final RecipeService recipeService;
+    private final RecipeRepository recipeRepository;
 
-    public ImageService(ImageRepository imageRepository, IRecipeService recipeService) {
+    public ImageService(ImageRepository imageRepository, RecipeService recipeService, RecipeRepository recipeRepository) {
         this.imageRepository = imageRepository;
         this.recipeService = recipeService;
+        this.recipeRepository = recipeRepository;
     }
 
 
@@ -84,6 +86,45 @@ public class ImageService implements IImageService{
         imageRepository.save(image);
         }catch (Exception e){
             throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Override
+    public Image save(Image image) {
+        return imageRepository.save(image);
+    }
+
+    @Override
+    public void updateImageRecipeByUrl(String downloadUrl, Recipe recipe) {
+        Image image = imageRepository.findByDownloadUrl(downloadUrl)
+            .orElseThrow(() -> new ResourceNotFoundException("Image not found with url: " + downloadUrl));
+        image.setRecipe(recipe);
+        imageRepository.save(image);
+    }
+
+    @Override
+    public List<Image> getImagesByRecipe(Recipe recipe) {
+        return imageRepository.findByRecipeId(recipe.getId());
+    }
+
+    @Override
+    public Image saveImage(MultipartFile file, Integer recipeId) {
+        try {
+            Image imageEntity = new Image();
+            imageEntity.setFileName(file.getOriginalFilename());
+            imageEntity.setFileType(file.getContentType());
+            imageEntity.setImage(file.getBytes()); // BLOB
+
+
+            if (recipeId != null) {
+                Recipe recipe = recipeRepository.findById(recipeId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Recipe not found"));
+                imageEntity.setRecipe(recipe);
+            }
+
+            return imageRepository.save(imageEntity);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to save image", e);
         }
     }
 }
