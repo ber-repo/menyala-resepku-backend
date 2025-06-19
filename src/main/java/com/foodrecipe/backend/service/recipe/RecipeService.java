@@ -1,16 +1,16 @@
 package com.foodrecipe.backend.service.recipe;
 
+import com.foodrecipe.backend.dto.ImageDto;
+import com.foodrecipe.backend.dto.IngredientDto;
+import com.foodrecipe.backend.dto.RecipeDto;
+import com.foodrecipe.backend.dto.StepDto;
 import com.foodrecipe.backend.exception.RecipeNotFoundException;
 import com.foodrecipe.backend.exception.ResourceNotFoundException;
-import com.foodrecipe.backend.model.Image;
-import com.foodrecipe.backend.model.Ingredient;
-import com.foodrecipe.backend.model.Recipe;
-import com.foodrecipe.backend.model.Step;
-import com.foodrecipe.backend.repository.IngredientRepository;
-import com.foodrecipe.backend.repository.RecipeRepository;
+import com.foodrecipe.backend.model.*;
+import com.foodrecipe.backend.repository.*;
 import com.foodrecipe.backend.request.AddRecipeRequest;
 import com.foodrecipe.backend.request.RecipeUpdateRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 
@@ -22,65 +22,49 @@ import java.util.Optional;
 public class RecipeService implements IRecipeService{
     private final RecipeRepository recipeRepository;
     private final IngredientRepository ingredientRepository;
+    private final ModelMapper modelMapper;
+    private final ImageRepository imageRepository;
+    private final CategoryRepository categoryRepository;
+    private final StepRepository stepRepository;
+    private final UserRepository userRepository;
 
 
-    public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository) {
+    public RecipeService(RecipeRepository recipeRepository, IngredientRepository ingredientRepository, ModelMapper modelMapper, ImageRepository imageRepository, CategoryRepository categoryRepository, StepRepository stepRepository, UserRepository userRepository) {
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
+        this.modelMapper = modelMapper;
+        this.imageRepository = imageRepository;
+        this.categoryRepository = categoryRepository;
+        this.stepRepository = stepRepository;
+        this.userRepository = userRepository;
     }
 
 
     @Override
     public Recipe addRecipe(AddRecipeRequest request) {
+        Category category = Optional.ofNullable(categoryRepository.findByName(request.getCategory().getName()))
+                .orElseGet(() -> {
+                    Category newCategory = new Category(request.getCategory().getName());
+                    return categoryRepository.save(newCategory);
+                });
 
-        List<Ingredient> ingredients = new ArrayList<>();
-        if (request.getIngredients() != null) {
-            for (Ingredient ingredient : request.getIngredients()) {
-                Ingredient savedIngredient = Optional.ofNullable(ingredientRepository.findByIngredient(ingredient.getIngredient()))
-                        .orElseGet(() -> ingredientRepository.save(new Ingredient(ingredient.getIngredient())));
-                ingredients.add(savedIngredient);
-            }
-        }
+        request.setCategory(category);
 
-        List<Step> steps = request.getSteps() != null ? request.getSteps() : new ArrayList<>();
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + request.getUserId()));
 
-        
-        Recipe recipe = createRecipe(request, ingredients, steps);
-
-        
-        for (Ingredient ing : recipe.getIngredients()) {
-            ing.setRecipe(recipe);
-        }
-        for (Step step : recipe.getSteps()) {
-            step.setRecipe(recipe);
-        }
-
-        return recipeRepository.save(recipe);
-
-
-//        Ingredient ingredient = Optional.ofNullable(ingredientRepository.findByIngredient(request.getIngredient().getIngredient()))
-//                .orElseGet(() -> {
-//                    Ingredient newIngredient = new Ingredient(request.getIngredient().getIngredient());
-//                    return ingredientRepository.save(newIngredient);
-//                });
-//        Recipe recipe = createRecipe(request, List.of(ingredient));
-//        for (Ingredient ing : recipe.getIngredient()) {
-//            ing.setRecipe(recipe);
-//        }
-//        return recipeRepository.save(recipe);
+        return recipeRepository.save(createRecipe(request, category, user));
     }
 
-    private Recipe createRecipe(AddRecipeRequest request, List<Ingredient> ingredients, List<Step> steps) {
+    private Recipe createRecipe(AddRecipeRequest request, Category category, User user) {
         return new Recipe(
-                request.getRecipeName(),
                 request.getRecipeDescription(),
-                request.getIsFavorite(),
-                null, 
-                ingredients,
-                steps
+                request.getRecipeName(),
+                Optional.ofNullable(request.getIsFavorite()).orElse(false),
+                category,
+                user
         );
     }
-
 
 
     @Override
@@ -101,47 +85,19 @@ public class RecipeService implements IRecipeService{
         return recipeRepository.findById(recipeId)
                 .map(existingRecipe -> updateExistingRecipe(existingRecipe,request))
                 .map(recipeRepository :: save)
-                .orElseThrow(()-> new RecipeNotFoundException("product not found!"));
+                .orElseThrow(()-> new RecipeNotFoundException("Recipe not found!"));
     }
 
 
-    private Recipe updateExistingRecipe(Recipe existingRecipe, RecipeUpdateRequest request) {
-        
-        existingRecipe.setRecipeName(request.getRecipeName());
-        existingRecipe.setRecipeDescription(request.getRecipeDescription());
-        existingRecipe.setIsFavorite(request.getIsFavorite());
+    private Recipe updateExistingRecipe(Recipe existingProduct, RecipeUpdateRequest request) {
+        existingProduct.setRecipeName(request.getRecipeName());
+        existingProduct.setRecipeDescription(request.getRecipeDescription());
+        existingProduct.setIsFavorite(request.getIsFavorite());
 
-        
-        if (request.getIngredients() != null) {
-            
-            existingRecipe.getIngredients().clear();
-            
-            
-            for (Ingredient ingredient : request.getIngredients()) {
-                Ingredient savedIngredient = ingredientRepository.findByIngredient(ingredient.getIngredient());
-                if (savedIngredient == null) {
-                    savedIngredient = new Ingredient(ingredient.getIngredient());
-                    savedIngredient.setRecipe(existingRecipe);
-                } else {
-                    savedIngredient.setRecipe(existingRecipe);
-                }
-                existingRecipe.getIngredients().add(savedIngredient);
-            }
-        }
+        Category category = categoryRepository.findByName(request.getCategory().getName());
+        existingProduct.setCategory(category);
+        return  existingProduct;
 
-        
-        if (request.getSteps() != null) {
-            
-            existingRecipe.getSteps().clear();
-
-            
-            for (Step step : request.getSteps()) {
-                step.setRecipe(existingRecipe);
-                existingRecipe.getSteps().add(step);
-            }
-        }
-
-        return existingRecipe;
     }
 
     @Override
@@ -151,14 +107,15 @@ public class RecipeService implements IRecipeService{
 
     @Override
     public List<Recipe> searchRecipesByName(String keyword) {
-        if(keyword != null && !keyword.isEmpty()) {
-            List<Recipe> recipes = recipeRepository.findByRecipeNameContainingIgnoreCase(keyword);
-            if(recipes.isEmpty()) {
-                throw new ResourceNotFoundException("No recipes found with name: " + keyword);
-            }
-            return recipes;
+        if(keyword == null || keyword.isEmpty()) {
+            return new ArrayList<>();
         }
-        return recipeRepository.findByRecipeNameContainingIgnoreCase(keyword);
+
+        List<Recipe> recipes = recipeRepository.findByRecipeNameContainingIgnoreCase(keyword);
+        if(recipes.isEmpty()) {
+            throw new ResourceNotFoundException("No recipes found with name: " + keyword);
+        }
+        return recipes;
     }
 
     @Override
@@ -167,12 +124,59 @@ public class RecipeService implements IRecipeService{
     }
 
     @Override
-    public Recipe toggleFavoriteStatus(Integer id){
+    public Recipe updateToggleFavoriteStatus(Integer id){
         Recipe recipe = recipeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Recipe not found with id: " + id));
 
-        recipe.setIsFavorite(!recipe.getIsFavorite());
+
+        Boolean currentFavorite = recipe.getIsFavorite();
+        if (currentFavorite == null) {
+            recipe.setIsFavorite(true);
+        } else {
+            recipe.setIsFavorite(!currentFavorite);
+        }
 
         return recipeRepository.save(recipe);
     }
+
+    @Override
+    public List<RecipeDto> getConvertedRecipes(List<Recipe> recipes) {
+        return recipes.stream().map(this::convertToDto).toList();
+    }
+
+    @Override
+    public RecipeDto convertToDto(Recipe recipe){
+        RecipeDto recipeDto = modelMapper.map(recipe, RecipeDto.class);
+
+
+        List<Image> images = imageRepository.findByRecipeId(recipe.getId());
+        List<ImageDto> imageDtos = images.stream()
+                .map(image -> modelMapper.map(image, ImageDto.class))
+                .toList();
+        recipeDto.setImages(imageDtos);
+
+
+        List<Ingredient> ingredients = ingredientRepository.findByRecipeId(recipe.getId());
+        List<IngredientDto> ingredientDtos = ingredients.stream()
+                .map(ingredient -> modelMapper.map(ingredient, IngredientDto.class))
+                .toList();
+        recipeDto.setIngredient(ingredientDtos);
+
+
+        List<Step> steps = stepRepository.findByRecipeId(recipe.getId());
+        List<StepDto> stepDtos = steps.stream()
+                .map(step -> modelMapper.map(step, StepDto.class))
+                .toList();
+        recipeDto.setStep(stepDtos);
+
+        return recipeDto;
+    }
+
+    @Override
+    public Recipe save(Recipe recipe) {
+        return recipeRepository.save(recipe);
+    }
+
+
+
 }
